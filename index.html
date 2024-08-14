@@ -6,6 +6,7 @@
     <title>手机页面</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
     <style>
+        /* 保留之前的样式 */
         :root {
             --header-height: 200px;
         }
@@ -59,7 +60,7 @@
         .text-center {
             text-align: center;
         }
-        /* 确保 Markdown 内容正确显示 */
+        /* Markdown 样式 */
         .scrollable-content h1, 
         .scrollable-content h2, 
         .scrollable-content h3, 
@@ -98,34 +99,40 @@
     <script>
         console.log('脚本开始执行');
 
+        // 配置 marked
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            headerIds: false
+        });
+
         function renderContent(content) {
             console.log('开始渲染内容');
             const contentDiv = document.getElementById('content');
             const lines = content.split('\n');
-            let markdownContent = '';
+            let processedContent = '';
             
             console.log('处理内容行数:', lines.length);
 
             lines.forEach((line, index) => {
                 if (line.startsWith('//')) {
                     const hiddenText = line.substring(2);
-                    markdownContent += `<span class="hidden-text">${marked.parse(hiddenText)}</span>\n`;
+                    processedContent += `<span class="hidden-text">${marked.parse(hiddenText)}</span>\n`;
                 } else {
-                    markdownContent += line + '\n';
+                    processedContent += line + '\n';
                 }
             });
 
-            console.log('Markdown 内容长度:', markdownContent.length);
-            console.log('Markdown 内容预览:', markdownContent.substring(0, 100));
+            console.log('处理后的内容长度:', processedContent.length);
+            console.log('处理后的内容预览:', processedContent.substring(0, 100));
 
             try {
                 console.log('尝试渲染 Markdown');
-                const renderedContent = marked.parse(markdownContent);
+                const renderedContent = marked.parse(processedContent);
                 console.log('Markdown 渲染完成，长度:', renderedContent.length);
                 console.log('渲染结果预览:', renderedContent.substring(0, 100));
                 contentDiv.innerHTML = renderedContent;
                 
-                // 添加这行来检查实际插入的内容
                 console.log('实际插入的 HTML:', contentDiv.innerHTML);
             } catch (error) {
                 console.error('Markdown 渲染错误:', error);
