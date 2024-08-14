@@ -50,6 +50,7 @@
             color: transparent;
             cursor: pointer;
             user-select: none;
+            display: inline;
         }
         .revealed {
             background-color: transparent;
@@ -68,30 +69,20 @@
     </div>
 
     <script>
+        function processHiddenText(text) {
+            const hiddenTextRegex = /\/\/(.*?)\/\//g;
+            return text.replace(hiddenTextRegex, '<span class="hidden-text">$1</span>');
+        }
+
         function processContent(content) {
+            // 处理以 // 开头的整行隐藏文本
             const lines = content.split('\n');
-            let processedContent = '';
-            let inHiddenBlock = false;
-
-            lines.forEach(line => {
+            let processedContent = lines.map(line => {
                 if (line.startsWith('//')) {
-                    if (!inHiddenBlock) {
-                        processedContent += '<div class="hidden-text">';
-                        inHiddenBlock = true;
-                    }
-                    processedContent += line.substring(2) + '\n';
-                } else {
-                    if (inHiddenBlock) {
-                        processedContent += '</div>';
-                        inHiddenBlock = false;
-                    }
-                    processedContent += line + '\n';
+                    return '<span class="hidden-text">' + line.substring(2) + '</span>';
                 }
-            });
-
-            if (inHiddenBlock) {
-                processedContent += '</div>';
-            }
+                return processHiddenText(line);
+            }).join('\n');
 
             return marked.parse(processedContent);
         }
