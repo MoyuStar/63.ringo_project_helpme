@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>手机页面</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/2.1.3/marked.min.js"></script>
     <style>
+        :root {
+            --header-height: 200px;
+        }
         body, html {
             margin: 0;
             padding: 0;
@@ -21,7 +25,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 200px;
+            height: var(--header-height);
             z-index: 10;
             background-color: #ccc;
             display: flex;
@@ -33,12 +37,14 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center;
         }
         .scrollable-content {
-            margin-top: 200px; /* 与固定图片高度相同 */
+            margin-top: var(--header-height);
             flex-grow: 1;
             overflow-y: auto;
             padding: 20px;
+            line-height: 1.6;
         }
         .hidden-text {
             background-color: black;
@@ -49,6 +55,41 @@
         .revealed {
             background-color: transparent;
             color: inherit;
+        }
+        /* 新增样式 */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        p {
+            margin-bottom: 1em;
+        }
+        .text-center {
+            text-align: center;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #333;
+            margin: 1em 0;
+        }
+        blockquote {
+            border-left: 4px solid #ccc;
+            margin: 1em 0;
+            padding-left: 1em;
+            font-style: italic;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        pre code {
+            display: block;
+            padding: 1em;
+            overflow-x: auto;
         }
     </style>
 </head>
@@ -66,36 +107,41 @@
         function renderContent(content) {
             const contentDiv = document.getElementById('content');
             const lines = content.split('\n');
+            let markdownContent = '';
+            
             lines.forEach(line => {
-                const p = document.createElement('p');
                 if (line.startsWith('//')) {
-                    p.textContent = line.substring(2);
-                    p.className = 'hidden-text';
-                    p.addEventListener('touchstart', function(e) {
-                        e.preventDefault();
-                        this.classList.add('revealed');
-                    });
-                    p.addEventListener('touchend', function() {
-                        this.classList.remove('revealed');
-                    });
-                    p.addEventListener('mousedown', function(e) {
-                        e.preventDefault();
-                        this.classList.add('revealed');
-                    });
-                    p.addEventListener('mouseup', function() {
-                        this.classList.remove('revealed');
-                    });
-                    p.addEventListener('mouseleave', function() {
-                        this.classList.remove('revealed');
-                    });
+                    // 处理隐藏文本
+                    const hiddenText = line.substring(2);
+                    markdownContent += `<span class="hidden-text">${marked(hiddenText)}</span>\n`;
                 } else {
-                    p.textContent = line;
+                    // 普通Markdown内容
+                    markdownContent += line + '\n';
                 }
-                contentDiv.appendChild(p);
+            });
+
+            // 渲染Markdown内容
+            contentDiv.innerHTML = marked(markdownContent);
+
+            // 为隐藏文本添加事件监听器
+            document.querySelectorAll('.hidden-text').forEach(el => {
+                el.addEventListener('touchstart', revealText);
+                el.addEventListener('touchend', hideText);
+                el.addEventListener('mousedown', revealText);
+                el.addEventListener('mouseup', hideText);
+                el.addEventListener('mouseleave', hideText);
             });
         }
 
-        // 从1.txt文件加载内容
+        function revealText(e) {
+            e.preventDefault();
+            this.classList.add('revealed');
+        }
+
+        function hideText() {
+            this.classList.remove('revealed');
+        }
+
         fetch('1.txt')
             .then(response => response.text())
             .then(data => {
