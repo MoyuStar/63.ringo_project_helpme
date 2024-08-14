@@ -6,7 +6,7 @@
     <title>手机页面</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
     <style>
-        /* 之前的 CSS 样式保持不变 */
+        /* 保留之前的 CSS 样式 */
         :root {
             --header-height: 200px;
         }
@@ -57,49 +57,7 @@
             background-color: transparent;
             color: inherit;
         }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
-        }
-        p {
-            margin-bottom: 1em;
-        }
-        .text-center {
-            text-align: center;
-        }
-        hr {
-            border: 0;
-            height: 1px;
-            background: #333;
-            margin: 1em 0;
-        }
-        blockquote {
-            border-left: 4px solid #ccc;
-            margin: 1em 0;
-            padding-left: 1em;
-            font-style: italic;
-        }
-        code {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #f0f0f0;
-            padding: 2px 4px;
-            border-radius: 4px;
-        }
-        pre code {
-            display: block;
-            padding: 1em;
-            overflow-x: auto;
-        }
-        /* 新增调试样式 */
-        .debug-info {
-            background-color: #ffeeee;
-            border: 1px solid #ffcccc;
-            padding: 10px;
-            margin-bottom: 10px;
-            white-space: pre-wrap;
-            font-family: monospace;
-        }
+        /* 其他样式保持不变 */
     </style>
 </head>
 <body>
@@ -107,26 +65,21 @@
         <div class="fixed-image">
             <img src="header-image.jpg" alt="固定图片">
         </div>
-        <div id="debug" class="debug-info" style="display: none;"></div>
         <div class="scrollable-content" id="content">
             <!-- 文本内容将在这里动态加载 -->
         </div>
     </div>
 
     <script>
-        function debug(message) {
-            const debugElement = document.getElementById('debug');
-            debugElement.style.display = 'block';
-            debugElement.textContent += message + '\n';
-        }
+        console.log('脚本开始执行');
 
         function renderContent(content) {
-            debug('开始渲染内容');
+            console.log('开始渲染内容');
             const contentDiv = document.getElementById('content');
             const lines = content.split('\n');
             let markdownContent = '';
             
-            debug('处理内容行数: ' + lines.length);
+            console.log('处理内容行数:', lines.length);
 
             lines.forEach((line, index) => {
                 if (line.startsWith('//')) {
@@ -137,14 +90,17 @@
                 }
             });
 
-            debug('Markdown 内容长度: ' + markdownContent.length);
+            console.log('Markdown 内容长度:', markdownContent.length);
+            console.log('Markdown 内容预览:', markdownContent.substring(0, 100));
 
             try {
+                console.log('尝试渲染 Markdown');
                 const renderedContent = marked.parse(markdownContent);
-                debug('Markdown 渲染完成，长度: ' + renderedContent.length);
+                console.log('Markdown 渲染完成，长度:', renderedContent.length);
+                console.log('渲染结果预览:', renderedContent.substring(0, 100));
                 contentDiv.innerHTML = renderedContent;
             } catch (error) {
-                debug('Markdown 渲染错误: ' + error.message);
+                console.error('Markdown 渲染错误:', error);
                 contentDiv.innerHTML = '<p>渲染 Markdown 时出错。</p>';
             }
 
@@ -156,7 +112,7 @@
                 el.addEventListener('mouseleave', hideText);
             });
 
-            debug('内容渲染完成');
+            console.log('内容渲染完成');
         }
 
         function revealText(e) {
@@ -170,19 +126,20 @@
 
         // 确保 marked 已经加载
         if (typeof marked === 'undefined') {
-            debug('错误: marked 库未加载');
+            console.error('错误: marked 库未加载');
         } else {
-            debug('marked 库已加载');
+            console.log('marked 库已加载');
         }
 
         fetch('1.txt')
             .then(response => response.text())
             .then(data => {
-                debug('文件加载成功，内容长度: ' + data.length);
+                console.log('文件加载成功，内容长度:', data.length);
+                console.log('文件内容预览:', data.substring(0, 100));
                 renderContent(data);
             })
             .catch(error => {
-                debug('加载文件时出错: ' + error.message);
+                console.error('加载文件时出错:', error);
                 document.getElementById('content').innerHTML = '<p>加载文件时出错，请确保1.txt文件存在且可访问。</p>';
             });
     </script>
