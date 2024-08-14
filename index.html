@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>手机页面</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        /* 保留之前的样式 */
         :root {
             --header-height: 200px;
         }
@@ -19,7 +18,7 @@
         .container {
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            height: 100%;
         }
         .fixed-image {
             position: fixed;
@@ -43,9 +42,8 @@
         .scrollable-content {
             margin-top: var(--header-height);
             flex-grow: 1;
+            overflow-y: auto;
             padding: 20px;
-            line-height: 1.6;
-            background-color: white;
         }
         .hidden-text {
             background-color: black;
@@ -56,33 +54,6 @@
         .revealed {
             background-color: transparent;
             color: inherit;
-        }
-        .text-center {
-            text-align: center;
-        }
-        /* Markdown 样式 */
-        .scrollable-content h1, 
-        .scrollable-content h2, 
-        .scrollable-content h3, 
-        .scrollable-content h4, 
-        .scrollable-content h5, 
-        .scrollable-content h6 {
-            margin-top: 1em;
-            margin-bottom: 0.5em;
-        }
-        .scrollable-content p {
-            margin-bottom: 1em;
-        }
-        .scrollable-content ul, 
-        .scrollable-content ol {
-            margin-bottom: 1em;
-            padding-left: 2em;
-        }
-        .scrollable-content blockquote {
-            border-left: 4px solid #ccc;
-            padding-left: 1em;
-            margin-left: 0;
-            font-style: italic;
         }
     </style>
 </head>
@@ -97,79 +68,62 @@
     </div>
 
     <script>
-        console.log('脚本开始执行');
-
-        // 配置 marked
-        marked.setOptions({
-            breaks: true,
-            gfm: true,
-            headerIds: false
-        });
-
-        function renderContent(content) {
-            console.log('开始渲染内容');
-            const contentDiv = document.getElementById('content');
+        function processContent(content) {
             const lines = content.split('\n');
             let processedContent = '';
-            
-            console.log('处理内容行数:', lines.length);
+            let inHiddenBlock = false;
 
-            lines.forEach((line, index) => {
+            lines.forEach(line => {
                 if (line.startsWith('//')) {
-                    const hiddenText = line.substring(2);
-                    processedContent += `<span class="hidden-text">${marked.parse(hiddenText)}</span>\n`;
+                    if (!inHiddenBlock) {
+                        processedContent += '<div class="hidden-text">';
+                        inHiddenBlock = true;
+                    }
+                    processedContent += line.substring(2) + '\n';
                 } else {
+                    if (inHiddenBlock) {
+                        processedContent += '</div>';
+                        inHiddenBlock = false;
+                    }
                     processedContent += line + '\n';
                 }
             });
 
-            console.log('处理后的内容长度:', processedContent.length);
-            console.log('处理后的内容预览:', processedContent.substring(0, 100));
-
-            try {
-                console.log('尝试渲染 Markdown');
-                const renderedContent = marked.parse(processedContent);
-                console.log('Markdown 渲染完成，长度:', renderedContent.length);
-                console.log('渲染结果预览:', renderedContent.substring(0, 100));
-                contentDiv.innerHTML = renderedContent;
-                
-                console.log('实际插入的 HTML:', contentDiv.innerHTML);
-            } catch (error) {
-                console.error('Markdown 渲染错误:', error);
-                contentDiv.innerHTML = '<p>渲染 Markdown 时出错。</p>';
+            if (inHiddenBlock) {
+                processedContent += '</div>';
             }
 
-            document.querySelectorAll('.hidden-text').forEach(el => {
-                el.addEventListener('touchstart', revealText, {passive: true});
-                el.addEventListener('touchend', hideText);
-                el.addEventListener('mousedown', revealText);
-                el.addEventListener('mouseup', hideText);
-                el.addEventListener('mouseleave', hideText);
+            return marked.parse(processedContent);
+        }
+
+        function renderContent(content) {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = processContent(content);
+
+            document.querySelectorAll('.hidden-text').forEach(element => {
+                element.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    this.classList.add('revealed');
+                });
+                element.addEventListener('touchend', function() {
+                    this.classList.remove('revealed');
+                });
+                element.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    this.classList.add('revealed');
+                });
+                element.addEventListener('mouseup', function() {
+                    this.classList.remove('revealed');
+                });
+                element.addEventListener('mouseleave', function() {
+                    this.classList.remove('revealed');
+                });
             });
-
-            console.log('内容渲染完成');
-        }
-
-        function revealText(e) {
-            this.classList.add('revealed');
-        }
-
-        function hideText() {
-            this.classList.remove('revealed');
-        }
-
-        // 确保 marked 已经加载
-        if (typeof marked === 'undefined') {
-            console.error('错误: marked 库未加载');
-        } else {
-            console.log('marked 库已加载');
         }
 
         fetch('1.txt')
             .then(response => response.text())
             .then(data => {
-                console.log('文件加载成功，内容长度:', data.length);
-                console.log('文件内容预览:', data.substring(0, 100));
                 renderContent(data);
             })
             .catch(error => {
