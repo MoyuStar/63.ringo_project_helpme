@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>手机页面</title>
+    <title>Tales of Orange</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
@@ -35,9 +35,9 @@
         }
         .fixed-image img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
+            height: auto;
+            object-fit: contain;
+            object-position: center top;
         }
         .scrollable-content {
             margin-top: var(--header-height);
@@ -61,7 +61,7 @@
 <body>
     <div class="container">
         <div class="fixed-image">
-            <img src="header-image.jpg" alt="固定图片">
+            <img src="header-image.jpg" alt="Tales of Orange">
         </div>
         <div class="scrollable-content" id="content">
             <!-- 文本内容将在这里动态加载 -->
@@ -75,7 +75,6 @@
         }
 
         function processContent(content) {
-            // 处理以 // 开头的整行隐藏文本
             const lines = content.split('\n');
             let processedContent = lines.map(line => {
                 if (line.startsWith('//')) {
