@@ -6,7 +6,6 @@
     <title>手机页面</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
     <style>
-        /* 保留之前的 CSS 样式 */
         :root {
             --header-height: 200px;
         }
@@ -19,7 +18,7 @@
         .container {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            min-height: 100vh;
         }
         .fixed-image {
             position: fixed;
@@ -43,9 +42,9 @@
         .scrollable-content {
             margin-top: var(--header-height);
             flex-grow: 1;
-            overflow-y: auto;
             padding: 20px;
             line-height: 1.6;
+            background-color: white;
         }
         .hidden-text {
             background-color: black;
@@ -57,7 +56,33 @@
             background-color: transparent;
             color: inherit;
         }
-        /* 其他样式保持不变 */
+        .text-center {
+            text-align: center;
+        }
+        /* 确保 Markdown 内容正确显示 */
+        .scrollable-content h1, 
+        .scrollable-content h2, 
+        .scrollable-content h3, 
+        .scrollable-content h4, 
+        .scrollable-content h5, 
+        .scrollable-content h6 {
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+        }
+        .scrollable-content p {
+            margin-bottom: 1em;
+        }
+        .scrollable-content ul, 
+        .scrollable-content ol {
+            margin-bottom: 1em;
+            padding-left: 2em;
+        }
+        .scrollable-content blockquote {
+            border-left: 4px solid #ccc;
+            padding-left: 1em;
+            margin-left: 0;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -99,13 +124,16 @@
                 console.log('Markdown 渲染完成，长度:', renderedContent.length);
                 console.log('渲染结果预览:', renderedContent.substring(0, 100));
                 contentDiv.innerHTML = renderedContent;
+                
+                // 添加这行来检查实际插入的内容
+                console.log('实际插入的 HTML:', contentDiv.innerHTML);
             } catch (error) {
                 console.error('Markdown 渲染错误:', error);
                 contentDiv.innerHTML = '<p>渲染 Markdown 时出错。</p>';
             }
 
             document.querySelectorAll('.hidden-text').forEach(el => {
-                el.addEventListener('touchstart', revealText);
+                el.addEventListener('touchstart', revealText, {passive: true});
                 el.addEventListener('touchend', hideText);
                 el.addEventListener('mousedown', revealText);
                 el.addEventListener('mouseup', hideText);
@@ -116,7 +144,6 @@
         }
 
         function revealText(e) {
-            e.preventDefault();
             this.classList.add('revealed');
         }
 
